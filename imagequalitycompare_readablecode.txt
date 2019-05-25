@@ -1,0 +1,40 @@
+% Load your PNG or other compatible lossless source here
+ref = imread('C:\Users\jackm\Pictures\image compression testing\new folder\lossless\amd_zen.png');
+% Use the same file path here
+refinfo = dir('C:\Users\jackm\Pictures\image compression testing\new folder\lossless\amd_zen.png');
+refsize = refinfo.bytes;
+
+% Load your compressed image here (It's easier to convert to tif for this)
+comp = imread('C:\Users\jackm\Pictures\image compression testing\new folder\lossy\amd_zen.webp.tif');
+% Load the unconverted compressed image here
+compinfo = dir('C:\Users\jackm\Pictures\image compression testing\new folder\lossy\amd_zen.webp');
+compsize = compinfo.bytes;
+diffsize = refsize - compsize;
+
+% This just initalizes some variables or some shit
+[ssimval, ssimmap] = ssim(comp,ref);
+[peaksnr, snr] = psnr(comp, ref);
+
+% Commenting out these plot things just looks nicer
+%subplot(1,2,1); 
+imshow(ref); title('Reference Image');
+%subplot(1,2,2); 
+imshow(comp); title('Compressed Image');
+
+% This is the SSIM difference picture
+figure, imshow(ssimmap,[]); title(sprintf('ssim Index Map - Mean ssim Value is %0.4f',ssimval));
+
+% Results and math and shit
+fprintf('┌-----------------------┬-------------------------------┐');
+fprintf('| The Peak-SNR value is:|     %0.4f. Higher is better |', peaksnr);
+fprintf('├-----------------------┼-------------------------------┤');
+fprintf('| The SNR value is:     |     %0.4f. Higher is better |', snr);
+fprintf('├-----------------------┼-------------------------------┤');
+fprintf('| The SSIM value is:    |      %0.4f. Higher is better |',ssimval);
+fprintf('├-----------------------┼-------------------------------┤');
+fprintf('| Original File Size:   |                 %4.0f bytes |',refsize);
+fprintf('├-----------------------┼-------------------------------┤');
+fprintf('| Compressed File Size: |                 %4.0f bytes |',compsize);
+fprintf('├-----------------------┼-------------------------------┤');
+fprintf('| Size Difference:      |                 %4.0f bytes |',diffsize);
+fprintf('└-----------------------┴-------------------------------┘');
