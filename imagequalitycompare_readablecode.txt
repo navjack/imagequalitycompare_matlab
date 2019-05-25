@@ -14,7 +14,7 @@ compinfo = dir('C:\Users\jackm\Pictures\image compression testing\new folder\los
 compsize = compinfo.bytes;
 diffsize = refsize - compsize;
 
-% This just initalizes some variables or some shit
+% This just initializes some variables or some shit
 [ssimval, ssimmap] = ssim(comp,ref);
 [peaksnr, snr] = psnr(comp, ref);
 err = immse(comp, ref);
