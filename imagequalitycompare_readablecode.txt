@@ -17,6 +17,7 @@ diffsize = refsize - compsize;
 % This just initalizes some variables or some shit
 [ssimval, ssimmap] = ssim(comp,ref);
 [peaksnr, snr] = psnr(comp, ref);
+err = immse(comp, ref);
 
 % Commenting out these plot things just looks nicer
 %subplot(1,2,1); 
@@ -33,7 +34,9 @@ fprintf('| The Peak-SNR value is:|     %0.4fdB Higher is better|', peaksnr);
 fprintf('├-----------------------┼-------------------------------┤');
 fprintf('| The SNR value is:     |     %0.4fdB Higher is better|', snr);
 fprintf('├-----------------------┼-------------------------------┤');
-fprintf('| The SSIM value is:    |      %0.4fdB Higher is better|',ssimval);
+fprintf('| The SSIM value is:    |      %0.4f   Higher is better|',ssimval);
+fprintf('├-----------------------┼-------------------------------┤');
+fprintf('| The MSE value is:     |     %0.4f   Lower Is Better |',err);
 fprintf('├-----------------------┼-------------------------------┤');
 fprintf('| Original File Size:   |                 %4.0f bytes |',refsize);
 fprintf('├-----------------------┼-------------------------------┤');
