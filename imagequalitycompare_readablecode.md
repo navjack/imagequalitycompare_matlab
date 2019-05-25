@@ -1,3 +1,4 @@
+```MATLAB
 % Compatible image formats are:
 % XWD, TIFF, RAS, PPM, PNG, PGM, PCX, JP2, JPEG, ICO, HDF4, GIF, CUR, BMP
 
@@ -44,3 +45,4 @@ fprintf('| Compressed File Size: |                 %4.0f bytes |',compsize);
 fprintf('├-----------------------┼-------------------------------┤');
 fprintf('| Size Difference:      |                 %4.0f bytes |',diffsize);
 fprintf('└-----------------------┴-------------------------------┘');
+```
