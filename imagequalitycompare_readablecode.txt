@@ -1,3 +1,6 @@
+% Compatible image formats are:
+% XWD, TIFF, RAS, PPM, PNG, PGM, PCX, JP2, JPEG, ICO, HDF4, GIF, CUR, BMP
+
 % Load your PNG or other compatible lossless source here
 ref = imread('C:\Users\jackm\Pictures\image compression testing\new folder\lossless\amd_zen.png');
 % Use the same file path here
