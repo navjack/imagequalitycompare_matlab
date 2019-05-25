@@ -26,11 +26,11 @@ figure, imshow(ssimmap,[]); title(sprintf('ssim Index Map - Mean ssim Value is %
 
 % Results and math and shit
 fprintf('┌-----------------------┬-------------------------------┐');
-fprintf('| The Peak-SNR value is:|     %0.4f. Higher is better |', peaksnr);
+fprintf('| The Peak-SNR value is:|     %0.4fdB Higher is better|', peaksnr);
 fprintf('├-----------------------┼-------------------------------┤');
-fprintf('| The SNR value is:     |     %0.4f. Higher is better |', snr);
+fprintf('| The SNR value is:     |     %0.4fdB Higher is better|', snr);
 fprintf('├-----------------------┼-------------------------------┤');
-fprintf('| The SSIM value is:    |      %0.4f. Higher is better |',ssimval);
+fprintf('| The SSIM value is:    |      %0.4fdB Higher is better|',ssimval);
 fprintf('├-----------------------┼-------------------------------┤');
 fprintf('| Original File Size:   |                 %4.0f bytes |',refsize);
 fprintf('├-----------------------┼-------------------------------┤');
