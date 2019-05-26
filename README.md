@@ -5,6 +5,7 @@ A quick image quality compare thing for MATLAB
 ## The Deets
 
 The MLX file has the good stuff in it
+
 The MLAPP and PRJ are a work in progress
 
 ### What it do?
