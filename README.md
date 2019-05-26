@@ -14,7 +14,7 @@ Uses MATLAB's built in PSNR, SSIM and MSE calculation functions to find differen
 ## What Files Do I Use?
 
 * ImageQualityCompare_FilePicker - uses a dialog box file browser window to pick your files. At this point I'd use this one for compatible file types only
-* ImageQualityCompare_Manual - uses manual entry for each of the files and this allows you to specify separate compressed versions. This allows you to convert unsupported image types to a TIF to compare the visual quality and then manually specify the original compressed file for the file size
+* ImageQualityCompare_Manual - uses manual entry for each of the files and this allows you to specify separate compressed versions. This allows you to convert unsupported image types to a TIF (Using another program) to compare the visual quality and then manually specify the original compressed file for the file size
 
 ## What File Types are Compatible?
 
