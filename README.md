@@ -10,4 +10,4 @@ Uses MATLAB's built in PSNR, SSIM and MSE calculation functions to find differen
 
 ## Example of it working
 
-![](https://raw.githubusercontent.com/navjack/imagequalitycompare_matlab/master/yeahitworks.jpg)
+![](https://raw.githubusercontent.com/navjack/imagequalitycompare_matlab/master/Preview.jpg)
