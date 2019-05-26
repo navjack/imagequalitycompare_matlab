@@ -1,11 +1,11 @@
 # imagequalitycompare_matlab
 
-a quick image quality compare thing for matlab
+a quick image quality compare thing for MATLAB
 
 ## The Deets
 
 the MLX file has the good stuff in it
-the mlapp and prj are a work in progress
+the MLAPP and PRJ are a work in progress
 
 ## What it do?
 
@@ -19,6 +19,10 @@ Uses MATLAB's built in PSNR, SSIM and MSE calculation functions to find differen
 ## What File Types are Compatible?
 
 Compatible image formats are: ```XWD, TIFF, RAS, PPM, PNG, PGM, PCX, JP2, JPEG, ICO, HDF4, GIF, CUR, BMP```
+
+## What Can I Help With?
+
+For starters you could help me with making this into a MATLAB App so we can have an EXE file that does the same thing as the MATLAB Live Script. The APP project I've included doesn't function yet, but it looks how I want the end result to look. Simple window with just two buttons. One to load the source and the other to load the compressed image. Then enough room (resizable would be nice) to show the images scaled to the window size along with the SSIM difference image. At the bottom would be a selectable text box with the results.
 
 ## Example of it working
 
