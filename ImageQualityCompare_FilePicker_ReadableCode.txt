@@ -36,18 +36,10 @@ delete ("C:\Temp\ImageQualityCompare\comp");
 
 figure, imshow(ssimmap,[]); title(sprintf('ssim Index Map - Mean ssim Value is %0.4f',ssimval));
 
-fprintf('┌-----------------------┬-------------------------------┐');
-fprintf('| The Peak-SNR value is:|     %0.4fdB Higher is better|', peaksnr);
-fprintf('├-----------------------┼-------------------------------┤');
-fprintf('| The SNR value is:     |     %0.4fdB Higher is better|', snr);
-fprintf('├-----------------------┼-------------------------------┤');
-fprintf('| The SSIM value is:    |      %0.4f   Higher is better|',ssimval);
-fprintf('├-----------------------┼-------------------------------┤');
-fprintf('| The MSE value is:     |     %0.4f    Lower Is Better|',err);
-fprintf('├-----------------------┼-------------------------------┤');
-fprintf('| Original File Size:   |                   %4.0f bytes|',refsize);
-fprintf('├-----------------------┼-------------------------------┤');
-fprintf('| Compressed File Size: |                   %4.0f bytes|',compsize);
-fprintf('├-----------------------┼-------------------------------┤');
-fprintf('| Size Difference:      |                    %4.0f bytes|',diffsize);
-fprintf('└-----------------------┴-------------------------------┘');
+fprintf('The Peak-SNR value is:		%0.4fdB Higher is better', peaksnr);
+fprintf('The SNR value is:		%0.4fdB Higher is better', snr);
+fprintf('The SSIM value is:		%0.4f   Higher is better',ssimval);
+fprintf('The MSE value is:		%0.4f    Lower Is Better',err);
+fprintf('Original File Size:		%4.0f bytes',refsize);
+fprintf('Compressed File Size:		%4.0f bytes',compsize);
+fprintf('Size Difference:		%4.0f bytes|',diffsize);
