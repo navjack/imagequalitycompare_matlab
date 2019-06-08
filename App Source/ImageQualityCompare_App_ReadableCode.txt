@@ -2,24 +2,27 @@ classdef ImageQualityCompare_app < matlab.apps.AppBase
 
     % Properties that correspond to app components
     properties (Access = public)
-        ImageQualityCompare  matlab.ui.Figure
-        GridLayout           matlab.ui.container.GridLayout
-        LeftPanel            matlab.ui.container.Panel
-        ComputeButton        matlab.ui.control.Button
-        DiffImage            matlab.ui.control.Image
-        TextArea             matlab.ui.control.TextArea
-        CenterPanel          matlab.ui.container.Panel
-        RefImageDisp         matlab.ui.control.Image
-        RefLabel             matlab.ui.control.Label
-        OpenRef              matlab.ui.control.Button
-        ReferenceImageLabel  matlab.ui.control.Label
-        RefImageDir          matlab.ui.control.Label
-        RightPanel           matlab.ui.container.Panel
-        CompImageDisp        matlab.ui.control.Image
-        CompLabel            matlab.ui.control.Label
-        OpenComp             matlab.ui.control.Button
-        CompareImageLabel    matlab.ui.control.Label
-        CompImageDir         matlab.ui.control.Label
+        ImageQualityCompare   matlab.ui.Figure
+        GridLayout            matlab.ui.container.GridLayout
+        LeftPanel             matlab.ui.container.Panel
+        ComputeButton         matlab.ui.control.Button
+        DiffImage             matlab.ui.control.Image
+        TextArea              matlab.ui.control.TextArea
+        NameAndVersionString  matlab.ui.control.Label
+        CenterPanel           matlab.ui.container.Panel
+        RefImageDisp          matlab.ui.control.Image
+        RefLabel              matlab.ui.control.Label
+        OpenRef               matlab.ui.control.Button
+        ReferenceImageLabel   matlab.ui.control.Label
+        RefImageDir           matlab.ui.control.Label
+        HiddenNavJack27       matlab.ui.control.Image
+        RightPanel            matlab.ui.container.Panel
+        CompImageDisp         matlab.ui.control.Image
+        CompLabel             matlab.ui.control.Label
+        OpenComp              matlab.ui.control.Button
+        CompareImageLabel     matlab.ui.control.Label
+        CompImageDir          matlab.ui.control.Label
+        HiddenChip            matlab.ui.control.Image
     end
 
     % Properties that correspond to apps with auto-reflow
@@ -30,21 +33,24 @@ classdef ImageQualityCompare_app < matlab.apps.AppBase
 
     
     properties (Access = public)
-        refpath % Description
-        ref % Description
-        refinfo % Description
-        refsize % Description
-        compinfo % Description
-        comp % Description
-        comppath % Description
-        compname % Description
-        compsize % Description
-        diffsize % Description
-        ssimval % Description
-        ssimmap % Description
-        peaksnr % Description
-        snr % Description
-        err % Description
+        % Source image variables
+            pathtosource % The path to the source image
+            thesourceimage % The source image itself
+            sourceinformation % The source image information
+            sourcesize % The source image size
+        % Comparison image variables
+            pathtocomparison % The path to the comparison image
+            thecomparisonimage % The comparison image itself
+            comparisoninformation % The comparison image information
+            comparisonsize % The comparison image size
+            comparisonname % The name of the comparison image
+        % Calculation stuff
+            ssimimagemap % The SSIM difference image
+            psnrvalue % The PSNR value
+            snrvalue % The SNR value
+            ssimvalue % The SSIM value
+            msevalue % The MSE value
+            sizedifference % The size difference between the source and the compared image
     end
     
 
@@ -89,58 +95,64 @@ classdef ImageQualityCompare_app < matlab.apps.AppBase
 
         % Button pushed function: OpenRef
         function OpenRefButtonPushed(app, event)
-            [file,path] = uigetfile('*.png;*.tif;*.tiff;*.jpg;*.jpeg;*.jp2;*.ico;*.gif;*.bmp;*.cur;*.hdf4;*.pcx;*.pgm;*.ppm;*.ras;*.xwd',"Pick a Reference Picture");
-            app.refpath = fullfile(path,file);
-            app.ref = imread(app.refpath);
-%                if isfolder("C:\Temp\ImageQualityCompare\")
-%                    copyfile (app.refpath, "C:\Temp\ImageQualityCompare\ref");
-%                else
-%                    mkdir("C:\Temp\ImageQualityCompare");
-%                    copyfile (app.refpath, "C:\Temp\ImageQualityCompare\ref");
-%                end
-            app.refinfo = imfinfo(app.refpath);
-            app.refsize = app.refinfo.FileSize;
-            app.RefImageDir.Text = app.refpath;
-            app.RefImageDisp.ImageSource = app.refpath;
-            app.RefLabel.Text = app.refpath;
+            % Open up a file open dialog window which is limited to image
+            % formats only
+                [file,path] = uigetfile('*.png;*.tif;*.tiff;*.jpg;*.jpeg;*.jp2;*.ico;*.gif;*.bmp;*.cur;*.hdf4;*.pcx;*.pgm;*.ppm;*.ras;*.xwd',"Pick a Reference Picture");
+            % We read the path to the file and parse out information which
+            % is stored in app variables called 'properties' which were
+            % previously initalized
+                app.pathtosource = fullfile(path,file);
+                app.thesourceimage = imread(app.pathtosource);
+                app.sourceinformation = imfinfo(app.pathtosource);
+                app.sourcesize = app.sourceinformation.FileSize;
+            % We update some of the UI elements to reflect the values
+            % collected
+                app.RefImageDir.Text = app.pathtosource;
+                app.RefImageDisp.ImageSource = app.pathtosource;
+                app.RefLabel.Text = app.pathtosource;
         end
 
         % Button pushed function: OpenComp
         function OpenCompButtonPushed(app, event)
-            [file,path] = uigetfile('*.png;*.tif;*.tiff;*.jpg;*.jpeg;*.jp2;*.ico;*.gif;*.bmp;*.cur;*.hdf4;*.pcx;*.pgm;*.ppm;*.ras;*.xwd',"Pick a Compressed Picture");
-            app.comppath = fullfile(path,file);
-            app.comp = imread(app.comppath);
-%                if isfolder("C:\Temp\ImageQualityCompare\")
-%                    copyfile (app.comppath, "C:\Temp\ImageQualityCompare\comp");
-%                else
-%                    mkdir("C:\Temp\ImageQualityCompare");
-%                    copyfile (app.comppath, "C:\Temp\ImageQualityCompare\comp");
-%                end
-            app.compinfo = imfinfo(app.comppath);
-            app.compsize = app.compinfo.FileSize;
-            app.compname = file;
-            app.diffsize = app.refsize - app.compsize;
-            app.CompImageDir.Text = app.comppath;
-            app.CompImageDisp.ImageSource = app.comppath;
-            app.CompLabel.Text = app.comppath;
+            % Open up a file open dialog window which is limited to image
+            % formats only
+                [file,path] = uigetfile('*.png;*.tif;*.tiff;*.jpg;*.jpeg;*.jp2;*.ico;*.gif;*.bmp;*.cur;*.hdf4;*.pcx;*.pgm;*.ppm;*.ras;*.xwd',"Pick a Compressed Picture");
+            % We read the path to the file and parse out information which
+            % is stored in app variables called 'properties' which were
+            % previously initalized
+                app.pathtocomparison = fullfile(path,file);
+                app.thecomparisonimage = imread(app.pathtocomparison);
+                app.comparisoninformation = imfinfo(app.pathtocomparison);
+                app.comparisonsize = app.comparisoninformation.FileSize;
+                app.comparisonname = file;
+                app.sizedifference = app.sourcesize - app.comparisonsize;
+            % We update some of the UI elements to reflect the values
+            % collected
+                app.CompImageDir.Text = app.pathtocomparison;
+                app.CompImageDisp.ImageSource = app.pathtocomparison;
+                app.CompLabel.Text = app.pathtocomparison;
         end
 
         % Button pushed function: ComputeButton
         function ComputeButtonPushed(app, event)
-            % This just initializes some variables or some shit
-            [app.ssimval, app.ssimmap] = ssim(app.comp,app.ref);
-            [app.peaksnr, app.snr] = psnr(app.comp, app.ref);
-            app.err = immse(app.comp, app.ref);
-            app.DiffImage.ImageSource = app.ssimmap;
-%            app.Results.Value = {'The Peak-SNR value is:		%0.4fdB Higher is better', app.peaksnr; 'The SNR value is:		%0.4fdB Higher is better', app.snr; 'The SSIM value is:		%0.4f   Higher is better', app.ssimval; 'The MSE value is:		%0.4f    Lower Is Better', app.err; 'Original File Size:		%4.0f bytes', app.refsize; 'Compressed File Size:		%4.0f bytes', app.compsize; 'Size Difference:		%4.0f bytes' app.diffsize};
-            cellArrayText{1} = sprintf('The Peak-SNR value is: %0.2fdB',app.peaksnr);
-            cellArrayText{2} = sprintf('The SNR value is: %0.2fdB',app.snr);
-            cellArrayText{3} = sprintf('The SSIM value is: %0.2f',app.ssimval);
-            cellArrayText{4} = sprintf('The MSE value is: %0.2f',app.err);
-            cellArrayText{5} = sprintf('Original File Size: %0.0fB',app.refsize);
-            cellArrayText{6} = sprintf('Compressed File Size: %0.0fB',app.compsize);
-            cellArrayText{7} = sprintf('Size Difference: %0.0fB',app.diffsize);
-            app.TextArea.Value = cellArrayText;
+            % We calculate the values for PSNR and SSIM and MSE along with
+            % creating a SSIM map in memory
+                [app.ssimvalue, app.ssimimagemap] = ssim(app.thecomparisonimage,app.thesourceimage);
+                [app.psnrvalue, app.snrvalue] = psnr(app.thecomparisonimage, app.thesourceimage);
+                app.msevalue = immse(app.thecomparisonimage, app.thesourceimage);
+                app.DiffImage.ImageSource = app.ssimimagemap;
+            % We print out the infomration into the text area
+                cellArrayText{1} = sprintf('The Peak-SNR value is: %0.2fdB',app.psnrvalue);
+                cellArrayText{2} = sprintf('The SNR value is: %0.2fdB',app.snrvalue);
+                cellArrayText{3} = sprintf('The SSIM value is: %0.2f',app.ssimvalue);
+                cellArrayText{4} = sprintf('The MSE value is: %0.2f',app.msevalue);
+                cellArrayText{5} = sprintf('Original File Size: %0.0fB',app.sourcesize);
+                cellArrayText{6} = sprintf('Compressed File Size: %0.0fB',app.comparisonsize);
+                cellArrayText{7} = sprintf('Size Difference: %0.0fB',app.sizedifference);
+                app.TextArea.Value = cellArrayText;
+            % TO-DO : Compose a offscreen buffer of sorts that contains
+            % both the source and the comparison image along with these
+            % values plus the SSIM map image for exporting to a PNG file
         end
     end
 
@@ -187,6 +199,11 @@ classdef ImageQualityCompare_app < matlab.apps.AppBase
             app.TextArea = uitextarea(app.LeftPanel);
             app.TextArea.Position = [6 13 206 140];
 
+            % Create NameAndVersionString
+            app.NameAndVersionString = uilabel(app.LeftPanel);
+            app.NameAndVersionString.Position = [6 399 159 22];
+            app.NameAndVersionString.Text = 'Image Quality Compare 0.15';
+
             % Create CenterPanel
             app.CenterPanel = uipanel(app.GridLayout);
             app.CenterPanel.Layout.Row = 1;
@@ -219,6 +236,12 @@ classdef ImageQualityCompare_app < matlab.apps.AppBase
             app.RefImageDir.Position = [58 50 207 22];
             app.RefImageDir.Text = '';
 
+            % Create HiddenNavJack27
+            app.HiddenNavJack27 = uiimage(app.CenterPanel);
+            app.HiddenNavJack27.ScaleMethod = 'none';
+            app.HiddenNavJack27.Position = [209 1 108 80];
+            app.HiddenNavJack27.ImageSource = 'nav.png';
+
             % Create RightPanel
             app.RightPanel = uipanel(app.GridLayout);
             app.RightPanel.Layout.Row = 1;
@@ -250,6 +273,12 @@ classdef ImageQualityCompare_app < matlab.apps.AppBase
             app.CompImageDir = uilabel(app.RightPanel);
             app.CompImageDir.Position = [58 50 207 22];
             app.CompImageDir.Text = '';
+
+            % Create HiddenChip
+            app.HiddenChip = uiimage(app.RightPanel);
+            app.HiddenChip.ScaleMethod = 'none';
+            app.HiddenChip.Position = [6 6 108 80];
+            app.HiddenChip.ImageSource = 'HC.png';
 
             % Show the figure after all components are created
             app.ImageQualityCompare.Visible = 'on';
