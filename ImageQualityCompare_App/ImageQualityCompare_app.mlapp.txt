@@ -1,0 +1,312 @@
+classdef ImageQualityCompare_app < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        ImageQualityCompare   matlab.ui.Figure
+        GridLayout            matlab.ui.container.GridLayout
+        LeftPanel             matlab.ui.container.Panel
+        ComputeButton         matlab.ui.control.Button
+        DiffImage             matlab.ui.control.Image
+        TextArea              matlab.ui.control.TextArea
+        NameAndVersionString  matlab.ui.control.Label
+        CenterPanel           matlab.ui.container.Panel
+        RefImageDisp          matlab.ui.control.Image
+        RefLabel              matlab.ui.control.Label
+        OpenRef               matlab.ui.control.Button
+        ReferenceImageLabel   matlab.ui.control.Label
+        RefImageDir           matlab.ui.control.Label
+        HiddenNavJack27       matlab.ui.control.Image
+        RightPanel            matlab.ui.container.Panel
+        CompImageDisp         matlab.ui.control.Image
+        CompLabel             matlab.ui.control.Label
+        OpenComp              matlab.ui.control.Button
+        CompareImageLabel     matlab.ui.control.Label
+        CompImageDir          matlab.ui.control.Label
+        HiddenChip            matlab.ui.control.Image
+    end
+
+    % Properties that correspond to apps with auto-reflow
+    properties (Access = private)
+        onePanelWidth = 576;
+        twoPanelWidth = 768;
+    end
+
+    
+    properties (Access = public)
+        % Source image variables
+            pathtosource % The path to the source image
+            thesourceimage % The source image itself
+            sourceinformation % The source image information
+            sourcesize % The source image size
+        % Comparison image variables
+            pathtocomparison % The path to the comparison image
+            thecomparisonimage % The comparison image itself
+            comparisoninformation % The comparison image information
+            comparisonsize % The comparison image size
+            comparisonname % The name of the comparison image
+        % Calculation stuff
+            ssimimagemap % The SSIM difference image
+            psnrvalue % The PSNR value
+            snrvalue % The SNR value
+            ssimvalue % The SSIM value
+            msevalue % The MSE value
+            sizedifference % The size difference between the source and the compared image
+    end
+    
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Changes arrangement of the app based on UIFigure width
+        function updateAppLayout(app, event)
+            currentFigureWidth = app.ImageQualityCompare.Position(3);
+            if(currentFigureWidth <= app.onePanelWidth)
+                % Change to a 3x1 grid
+                app.GridLayout.RowHeight = {422, 422, 422};
+                app.GridLayout.ColumnWidth = {'1x'};
+                app.CenterPanel.Layout.Row = 1;
+                app.CenterPanel.Layout.Column = 1;
+                app.LeftPanel.Layout.Row = 2;
+                app.LeftPanel.Layout.Column = 1;
+                app.RightPanel.Layout.Row = 3;
+                app.RightPanel.Layout.Column = 1;
+            elseif (currentFigureWidth > app.onePanelWidth && currentFigureWidth <= app.twoPanelWidth)
+                % Change to a 2x2 grid
+                app.GridLayout.RowHeight = {422, 422};
+                app.GridLayout.ColumnWidth = {'1x', '1x'};
+                app.CenterPanel.Layout.Row = 1;
+                app.CenterPanel.Layout.Column = [1,2];
+                app.LeftPanel.Layout.Row = 2;
+                app.LeftPanel.Layout.Column = 1;
+                app.RightPanel.Layout.Row = 2;
+                app.RightPanel.Layout.Column = 2;
+            else
+                % Change to a 1x3 grid
+                app.GridLayout.RowHeight = {'1x'};
+                app.GridLayout.ColumnWidth = {218, '1x', 320};
+                app.LeftPanel.Layout.Row = 1;
+                app.LeftPanel.Layout.Column = 1;
+                app.CenterPanel.Layout.Row = 1;
+                app.CenterPanel.Layout.Column = 2;
+                app.RightPanel.Layout.Row = 1;
+                app.RightPanel.Layout.Column = 3;
+            end
+        end
+
+        % Button pushed function: OpenRef
+        function OpenRefButtonPushed(app, event)
+            % Open up a file open dialog window which is limited to image
+            % formats only
+                [file,path] = uigetfile('*.png;*.tif;*.tiff;*.jpg;*.jpeg;*.jp2;*.ico;*.gif;*.bmp;*.cur;*.hdf4;*.pcx;*.pgm;*.ppm;*.ras;*.xwd',"Pick a Reference Picture");
+            % We read the path to the file and parse out information which
+            % is stored in app variables called 'properties' which were
+            % previously initalized
+                app.pathtosource = fullfile(path,file);
+                app.thesourceimage = imread(app.pathtosource);
+                app.sourceinformation = imfinfo(app.pathtosource);
+                app.sourcesize = app.sourceinformation.FileSize;
+            % We update some of the UI elements to reflect the values
+            % collected
+                app.RefImageDir.Text = app.pathtosource;
+                app.RefImageDisp.ImageSource = app.pathtosource;
+                app.RefLabel.Text = app.pathtosource;
+        end
+
+        % Button pushed function: OpenComp
+        function OpenCompButtonPushed(app, event)
+            % Open up a file open dialog window which is limited to image
+            % formats only
+                [file,path] = uigetfile('*.png;*.tif;*.tiff;*.jpg;*.jpeg;*.jp2;*.ico;*.gif;*.bmp;*.cur;*.hdf4;*.pcx;*.pgm;*.ppm;*.ras;*.xwd',"Pick a Compressed Picture");
+            % We read the path to the file and parse out information which
+            % is stored in app variables called 'properties' which were
+            % previously initalized
+                app.pathtocomparison = fullfile(path,file);
+                app.thecomparisonimage = imread(app.pathtocomparison);
+                app.comparisoninformation = imfinfo(app.pathtocomparison);
+                app.comparisonsize = app.comparisoninformation.FileSize;
+                app.comparisonname = file;
+                app.sizedifference = app.sourcesize - app.comparisonsize;
+            % We update some of the UI elements to reflect the values
+            % collected
+                app.CompImageDir.Text = app.pathtocomparison;
+                app.CompImageDisp.ImageSource = app.pathtocomparison;
+                app.CompLabel.Text = app.pathtocomparison;
+        end
+
+        % Button pushed function: ComputeButton
+        function ComputeButtonPushed(app, event)
+            % We calculate the values for PSNR and SSIM and MSE along with
+            % creating a SSIM map in memory
+                [app.ssimvalue, app.ssimimagemap] = ssim(app.thecomparisonimage,app.thesourceimage);
+                [app.psnrvalue, app.snrvalue] = psnr(app.thecomparisonimage, app.thesourceimage);
+                app.msevalue = immse(app.thecomparisonimage, app.thesourceimage);
+                app.DiffImage.ImageSource = app.ssimimagemap;
+            % We print out the infomration into the text area
+                cellArrayText{1} = sprintf('The Peak-SNR value is: %0.2fdB',app.psnrvalue);
+                cellArrayText{2} = sprintf('The SNR value is: %0.2fdB',app.snrvalue);
+                cellArrayText{3} = sprintf('The SSIM value is: %0.2f',app.ssimvalue);
+                cellArrayText{4} = sprintf('The MSE value is: %0.2f',app.msevalue);
+                cellArrayText{5} = sprintf('Original File Size: %0.0fB',app.sourcesize);
+                cellArrayText{6} = sprintf('Compressed File Size: %0.0fB',app.comparisonsize);
+                cellArrayText{7} = sprintf('Size Difference: %0.0fB',app.sizedifference);
+                app.TextArea.Value = cellArrayText;
+            % TO-DO : Compose a offscreen buffer of sorts that contains
+            % both the source and the comparison image along with these
+            % values plus the SSIM map image for exporting to a PNG file
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create ImageQualityCompare and hide until all components are created
+            app.ImageQualityCompare = uifigure('Visible', 'off');
+            app.ImageQualityCompare.AutoResizeChildren = 'off';
+            app.ImageQualityCompare.Position = [100 100 858 422];
+            app.ImageQualityCompare.Name = 'Image Quality Compare';
+            app.ImageQualityCompare.Resize = 'off';
+            app.ImageQualityCompare.SizeChangedFcn = createCallbackFcn(app, @updateAppLayout, true);
+
+            % Create GridLayout
+            app.GridLayout = uigridlayout(app.ImageQualityCompare);
+            app.GridLayout.ColumnWidth = {218, '1x', 320};
+            app.GridLayout.RowHeight = {'1x'};
+            app.GridLayout.ColumnSpacing = 0;
+            app.GridLayout.RowSpacing = 0;
+            app.GridLayout.Padding = [0 0 0 0];
+            app.GridLayout.Scrollable = 'on';
+
+            % Create LeftPanel
+            app.LeftPanel = uipanel(app.GridLayout);
+            app.LeftPanel.Layout.Row = 1;
+            app.LeftPanel.Layout.Column = 1;
+
+            % Create ComputeButton
+            app.ComputeButton = uibutton(app.LeftPanel, 'push');
+            app.ComputeButton.ButtonPushedFcn = createCallbackFcn(app, @ComputeButtonPushed, true);
+            app.ComputeButton.Position = [61 161 100 22];
+            app.ComputeButton.Text = 'Compute';
+
+            % Create DiffImage
+            app.DiffImage = uiimage(app.LeftPanel);
+            app.DiffImage.Position = [6 193 206 210];
+            app.DiffImage.ImageSource = 'dot.png';
+
+            % Create TextArea
+            app.TextArea = uitextarea(app.LeftPanel);
+            app.TextArea.Position = [6 13 206 140];
+
+            % Create NameAndVersionString
+            app.NameAndVersionString = uilabel(app.LeftPanel);
+            app.NameAndVersionString.Position = [6 399 159 22];
+            app.NameAndVersionString.Text = 'Image Quality Compare 0.15';
+
+            % Create CenterPanel
+            app.CenterPanel = uipanel(app.GridLayout);
+            app.CenterPanel.Layout.Row = 1;
+            app.CenterPanel.Layout.Column = 2;
+
+            % Create RefImageDisp
+            app.RefImageDisp = uiimage(app.CenterPanel);
+            app.RefImageDisp.Position = [6 91 308 310];
+            app.RefImageDisp.ImageSource = 'dot.png';
+
+            % Create RefLabel
+            app.RefLabel = uilabel(app.CenterPanel);
+            app.RefLabel.Position = [6 399 308 22];
+            app.RefLabel.Text = '';
+
+            % Create OpenRef
+            app.OpenRef = uibutton(app.CenterPanel, 'push');
+            app.OpenRef.ButtonPushedFcn = createCallbackFcn(app, @OpenRefButtonPushed, true);
+            app.OpenRef.Position = [113 19 100 22];
+            app.OpenRef.Text = 'Open';
+
+            % Create ReferenceImageLabel
+            app.ReferenceImageLabel = uilabel(app.CenterPanel);
+            app.ReferenceImageLabel.HorizontalAlignment = 'center';
+            app.ReferenceImageLabel.Position = [113 69 98 22];
+            app.ReferenceImageLabel.Text = 'Reference Image';
+
+            % Create RefImageDir
+            app.RefImageDir = uilabel(app.CenterPanel);
+            app.RefImageDir.Position = [58 50 207 22];
+            app.RefImageDir.Text = '';
+
+            % Create HiddenNavJack27
+            app.HiddenNavJack27 = uiimage(app.CenterPanel);
+            app.HiddenNavJack27.ScaleMethod = 'none';
+            app.HiddenNavJack27.Position = [209 1 108 80];
+            app.HiddenNavJack27.ImageSource = 'nav.png';
+
+            % Create RightPanel
+            app.RightPanel = uipanel(app.GridLayout);
+            app.RightPanel.Layout.Row = 1;
+            app.RightPanel.Layout.Column = 3;
+
+            % Create CompImageDisp
+            app.CompImageDisp = uiimage(app.RightPanel);
+            app.CompImageDisp.Position = [6 91 308 310];
+            app.CompImageDisp.ImageSource = 'dot.png';
+
+            % Create CompLabel
+            app.CompLabel = uilabel(app.RightPanel);
+            app.CompLabel.Position = [6 399 308 22];
+            app.CompLabel.Text = '';
+
+            % Create OpenComp
+            app.OpenComp = uibutton(app.RightPanel, 'push');
+            app.OpenComp.ButtonPushedFcn = createCallbackFcn(app, @OpenCompButtonPushed, true);
+            app.OpenComp.Position = [113 19 100 22];
+            app.OpenComp.Text = 'Open';
+
+            % Create CompareImageLabel
+            app.CompareImageLabel = uilabel(app.RightPanel);
+            app.CompareImageLabel.HorizontalAlignment = 'center';
+            app.CompareImageLabel.Position = [113 69 92 22];
+            app.CompareImageLabel.Text = 'Compare Image';
+
+            % Create CompImageDir
+            app.CompImageDir = uilabel(app.RightPanel);
+            app.CompImageDir.Position = [58 50 207 22];
+            app.CompImageDir.Text = '';
+
+            % Create HiddenChip
+            app.HiddenChip = uiimage(app.RightPanel);
+            app.HiddenChip.ScaleMethod = 'none';
+            app.HiddenChip.Position = [6 6 108 80];
+            app.HiddenChip.ImageSource = 'HC.png';
+
+            % Show the figure after all components are created
+            app.ImageQualityCompare.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = ImageQualityCompare_app
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.ImageQualityCompare)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.ImageQualityCompare)
+        end
+    end
+end

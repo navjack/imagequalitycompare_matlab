@@ -1,0 +1,51 @@
+% Compatible image formats are:
+% XWD, TIFF, RAS, PPM, PNG, PGM, PCX, JP2, JPEG, ICO, HDF4, GIF, CUR, BMP
+
+% Load your PNG or other compatible lossless source here
+ref = imread('C:\Users\jackm\Downloads\quake012.jpg');
+% Use the same file path here
+refinfo = imfinfo('C:\Users\jackm\Downloads\quake012.jpg');
+refsize = refinfo.FileSize;
+
+% Load your compressed image here (It's easier to convert to tif for this)
+comp = imread('C:\Users\jackm\Downloads\quake013.jpg');
+% Load the unconverted compressed image here
+compinfo = imfinfo('C:\Users\jackm\Downloads\quake013.jpg');
+compsize = compinfo.FileSize;
+compname = compinfo.Filename;
+diffsize = refsize - compsize;
+
+% This just initializes some variables or some shit
+[ssimval, ssimmap] = ssim(comp,ref);
+[peaksnr, snr] = psnr(comp, ref);
+err = immse(comp, ref);
+
+% Commenting out these plot things just looks nicer
+%subplot(1,2,1);
+fprintf('Results for: %s', compname);
+imshow(ref); title('Reference Image');
+%subplot(1,2,2);
+imshow(comp); title('Compressed Image');
+
+% This is the SSIM difference picture
+figure, imshow(ssimmap,[]); title(sprintf('ssim Index Map - Mean ssim Value is %0.4f',ssimval));
+
+% Results and math and shit
+
+%tpsnrv = ("The Peak-SNR value is:");
+%tsnrv = ("The SNR value is:");
+%tssimv = ("The SSIM value is:");
+%tmsev = ("The MSE value is:");
+%ofs = ("Original File Size:");
+%cfs = ("Compressed File Size:");
+%sd = ("Size Difference:");
+
+%results = table('VariableNames',{'tpsnrv','tsnrv','tssimv','tmsev','ofs','cfs','sd'},'RowNames',{'peaksnr','snr','ssimval','err','refsize','compsize','diffsize'})
+
+fprintf('The Peak-SNR value is:		%0.4fdB Higher is better', peaksnr);
+fprintf('The SNR value is:		%0.4fdB Higher is better', snr);
+fprintf('The SSIM value is:		%0.4f   Higher is better',ssimval);
+fprintf('The MSE value is:		%0.4f    Lower Is Better',err);
+fprintf('Original File Size:		%4.0f bytes',refsize);
+fprintf('Compressed File Size:		%4.0f bytes',compsize);
+fprintf('Size Difference:		%4.0f bytes',diffsize);

@@ -1,0 +1,19 @@
+%AVIFEncoder = 'e:\avif-win-x64.exe --lossless -e '
+%InFolder = '"C:\Users\jackm\OneDrive\Quake 2 RTX Screenshots\'
+%ConvertCommand1 = sprintf('%s',AVIFEncoder,InFolder)
+%FileNoNumber = 'Quake_2_RTX_';
+%for v = 6:+1:45
+%    FileNumber = int2str(v);
+%    EXT = '.png"';
+%    ConvertCommand2 = sprintf('%s',ConvertCommand1,FileNoNumber,FileNumber,EXT);
+%    ConvertCommand3 = ' -o ';
+%    ConEXT = '.avif"';
+%    ConvertCommand4 = sprintf('%s',ConvertCommand3,InFolder,FileNoNumber,FileNumber,ConEXT);
+%    RunME = sprintf('%s',ConvertCommand2,ConvertCommand4);
+%    [status,cmdout] = system(RunME);
+%end
+
+[UIFilesNames,UIFilesPath] = uigetfile('*.png;*.tif;*.tiff;*.jpg;*.jpeg;*.jp2;*.ico;*.gif;*.bmp;*.cur;*.hdf4;*.pcx;*.pgm;*.ppm;*.ras;*.xwd','Pick an image to convert.','multiselect','on')
+
+VarFiles = matlab.lang.makeUniqueStrings(UIFilesNames)
+%[r1c1, r1c2, r1c3] = file{1:1,1:3}

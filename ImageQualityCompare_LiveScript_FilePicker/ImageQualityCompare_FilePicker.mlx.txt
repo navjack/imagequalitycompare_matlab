@@ -1,0 +1,45 @@
+[file,path] = uigetfile('*.png;*.tif;*.tiff;*.jpg;*.jpeg;*.jp2;*.ico;*.gif;*.bmp;*.cur;*.hdf4;*.pcx;*.pgm;*.ppm;*.ras;*.xwd',"Pick a Reference Picture");
+refpath = fullfile(path,file);
+ref = imread(refpath);
+if isfolder("C:\Temp\ImageQualityCompare\")
+    copyfile (refpath, "C:\Temp\ImageQualityCompare\ref");
+else
+    mkdir("C:\Temp\ImageQualityCompare");
+    copyfile (refpath, "C:\Temp\ImageQualityCompare\ref");
+end
+refinfo = dir('C:\Temp\ImageQualityCompare\ref');
+refsize = refinfo.bytes;
+
+[file,path] = uigetfile('*.png;*.tif;*.tiff;*.jpg;*.jpeg;*.jp2;*.ico;*.gif;*.bmp;*.cur;*.hdf4;*.pcx;*.pgm;*.ppm;*.ras;*.xwd',"Pick a Compressed Picture");
+comppath = fullfile(path,file);
+comp = imread(comppath);
+if isfolder("C:\Temp\ImageQualityCompare\")
+    copyfile (comppath, "C:\Temp\ImageQualityCompare\comp");
+else
+    mkdir("C:\Temp\ImageQualityCompare");
+    copyfile (comppath, "C:\Temp\ImageQualityCompare\comp");
+end
+compinfo = dir('C:\Temp\ImageQualityCompare\comp');
+compsize = compinfo.bytes;
+compname = file;
+diffsize = refsize - compsize;
+
+[ssimval, ssimmap] = ssim(comp,ref);
+[peaksnr, snr] = psnr(comp, ref);
+err = immse(comp, ref);
+
+fprintf('Results for: %s', compname);
+imshow(ref); title('Reference Image');
+delete ("C:\Temp\ImageQualityCompare\ref");
+imshow(comp); title('Compressed Image');
+delete ("C:\Temp\ImageQualityCompare\comp");
+
+figure, imshow(ssimmap,[]); title(sprintf('ssim Index Map - Mean ssim Value is %0.4f',ssimval));
+
+fprintf('The Peak-SNR value is:		%0.4fdB Higher is better',peaksnr);
+fprintf('The SNR value is:		%0.4fdB Higher is better',snr);
+fprintf('The SSIM value is:		%0.4f   Higher is better',ssimval);
+fprintf('The MSE value is:		%0.4f    Lower Is Better',err);
+fprintf('Original File Size:		%4.0f bytes',refsize);
+fprintf('Compressed File Size:		%4.0f bytes',compsize);
+fprintf('Size Difference:		%4.0f bytes',diffsize);
